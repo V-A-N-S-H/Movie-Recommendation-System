@@ -6,24 +6,20 @@ import requests
 
 # Fetch movie poster from TMDB
 def fetch_poster(movie_id):
-    try:
-        url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8a9d3c8957241138878b8e163e577ffe&language=en-US"
-
-        response = requests.get(url, timeout=10)
-
-        if response.status_code != 200:
-            return "https://via.placeholder.com/500x750?text=No+Poster"
-
-        data = response.json()
-
-        if data.get('poster_path'):
-            return "https://image.tmdb.org/t/p/w500" + data['poster_path']
-
-        return "https://via.placeholder.com/500x750?text=No+Poster"
-
-    except Exception as e:
-        print(e)
-        return "https://via.placeholder.com/500x750?text=No+Poster"
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8a9d3c8957241138878b8e163e577ffe&language=en-US"
+    for _ in range(3):
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('poster_path'):
+                    return "https://image.tmdb.org/t/p/w500" + data['poster_path']
+                break  # If successful but no poster_path, exit retry loop
+        except Exception as e:
+            print(f"Error fetching poster: {e}")
+            continue  # Retry on connection errors
+    
+    return "https://placehold.co/500x750/png?text=No+Poster"
 
 
 # Recommendation Function
